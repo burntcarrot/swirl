@@ -14,11 +14,16 @@ func requestLog(h http.Handler) http.Handler {
 }
 
 func Serve(addr string) error {
-	fs := http.FileServer(http.Dir("./build"))
 	mux := http.NewServeMux()
-	mux.Handle("/", fs)
-	fmt.Printf("vite: serving on %s\n", addr)
-	if err := http.ListenAndServe(addr, requestLog(mux)); err != nil {
+	mux.Handle("/", http.FileServer(http.Dir("./build")))
+
+	server := http.Server{
+		Addr:    addr,
+		Handler: requestLog(mux),
+	}
+
+	fmt.Println("serving on", addr)
+	if err := server.ListenAndServe(); err != nil {
 		return err
 	}
 	return nil

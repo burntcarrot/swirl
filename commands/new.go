@@ -27,7 +27,7 @@ date: %s
 			return err
 		}
 		os.WriteFile(path, []byte(content), 0755)
-		fmt.Printf("vite: created new post at %s\n", path)
+		fmt.Printf("swirl: created new post at %s\n", path)
 		return nil
 	}
 

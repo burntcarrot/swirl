@@ -6,8 +6,8 @@ import (
 	"path/filepath"
 	"time"
 
-	"git.icyphox.sh/vite/config"
-	"git.icyphox.sh/vite/markdown"
+	"github.com/burntcarrot/swirl/config"
+	"github.com/burntcarrot/swirl/markdown"
 )
 
 type AtomLink struct {
