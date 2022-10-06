@@ -6,8 +6,8 @@ import (
 	gotmpl "text/template"
 	"time"
 
-	"git.icyphox.sh/vite/config"
-	"git.icyphox.sh/vite/markdown/template"
+	"github.com/burntcarrot/swirl/config"
+	"github.com/burntcarrot/swirl/markdown/template"
 
 	bfc "github.com/Depado/bfchroma"
 	"github.com/alecthomas/chroma/formatters/html"
@@ -23,8 +23,9 @@ var (
 )
 
 type Output struct {
-	HTML []byte
-	Meta Matter
+	HTML            []byte
+	Meta            Matter
+	EnableOpenGraph bool
 }
 
 // Renders markdown to html, and fetches metadata.

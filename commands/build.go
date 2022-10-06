@@ -9,10 +9,10 @@ import (
 	"sync"
 	"time"
 
-	"git.icyphox.sh/vite/atom"
-	"git.icyphox.sh/vite/config"
-	"git.icyphox.sh/vite/markdown"
-	"git.icyphox.sh/vite/util"
+	"github.com/burntcarrot/swirl/atom"
+	"github.com/burntcarrot/swirl/config"
+	"github.com/burntcarrot/swirl/markdown"
+	"github.com/burntcarrot/swirl/util"
 )
 
 const (
@@ -21,6 +21,8 @@ const (
 	TEMPLATES = "templates"
 	STATIC    = "static"
 )
+
+var ParsedPages Pages
 
 type Pages struct {
 	Dirs  []string
@@ -131,6 +133,16 @@ func (pgs *Pages) processDirs() error {
 				if err := out.RenderMarkdown(fb); err != nil {
 					return err
 				}
+
+				if config.Config.EnableOpenGraph {
+					out.EnableOpenGraph = true
+				}
+
+				if out.EnableOpenGraph {
+					out.Meta["ogUrl"] = fmt.Sprintf("%s%s/%s", config.Config.URL, "posts", out.Meta["slug"])
+					out.Meta["ogImage"] = fmt.Sprintf("%s%s", config.Config.OpenGraphURL, out.Meta["title"])
+				}
+
 				if err = out.RenderHTML(
 					htmlFile,
 					TEMPLATES,
@@ -190,9 +202,11 @@ func (pgs *Pages) processDirs() error {
 // Core builder function. Converts markdown to html,
 // copies over non .md files, etc.
 func Build() error {
-	fmt.Print("vite: building... ")
-	pages := Pages{}
-	if err := pages.initPages(); err != nil {
+	start := time.Now()
+	fmt.Print("swirl: building... ")
+	// pages := Pages{}
+
+	if err := ParsedPages.initPages(); err != nil {
 		return err
 	}
 
@@ -210,7 +224,7 @@ func Build() error {
 	// Deal with files.
 	// ex: pages/{_index,about,etc}.md
 	go func() {
-		err := pages.processFiles()
+		err := ParsedPages.processFiles()
 		if err != nil {
 			ec <- err
 		}
@@ -220,7 +234,7 @@ func Build() error {
 	// Deal with dirs -- i.e. dirs of markdown files.
 	// ex: pages/{blog,travel}/*.md
 	go func() {
-		err := pages.processDirs()
+		err := ParsedPages.processDirs()
 		if err != nil {
 			ec <- err
 		}
@@ -249,5 +263,16 @@ func Build() error {
 	}
 
 	fmt.Print("done\n")
+
+	fmt.Println()
+	fmt.Println("  Content        | Total")
+	fmt.Println("-----------------+--------")
+	fmt.Printf("  Files          | %d\n", len(ParsedPages.Files))
+	fmt.Printf("  Dirs           | %d\n", len(ParsedPages.Dirs))
+	fmt.Println()
+	duration := time.Since(start)
+	fmt.Printf("build time: %s\n", duration)
+	fmt.Println()
+
 	return nil
 }
