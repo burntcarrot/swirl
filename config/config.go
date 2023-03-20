@@ -25,9 +25,10 @@ type ConfigYaml struct {
 		Name  string `yaml:"name"`
 		Email string `yaml:"email"`
 	} `yaml:"author"`
-	URL string `yaml:"url"`
-	//	Prebuild  []string `yaml:"prebuild"`
-	//	Postbuild []string `yaml:"postbuild"`
+	URL             string `yaml:"url"`
+	EnableOpenGraph bool   `yaml:"enableOpenGraph"`
+	OpenGraphURL    string `yaml:"openGraphURL"`
+	TwitterAuthor   string `yaml:"twitterAuthor"`
 }
 
 func (c *ConfigYaml) parseConfig() error {
