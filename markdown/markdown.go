@@ -3,6 +3,8 @@ package markdown
 import (
 	"fmt"
 	"os"
+	"regexp"
+	"strings"
 	gotmpl "text/template"
 	"time"
 
@@ -53,8 +55,29 @@ func (out *Output) RenderMarkdown(source []byte) error {
 		),
 		bf.WithExtensions(bfExts),
 	)
+
+	// inject heading IDs
+	out.HTML = generateHeadingIDs(out.HTML)
+
 	out.Meta = md.Frontmatter
 	return nil
+}
+
+func generateHeadingIDs(html []byte) []byte {
+	headingRegex := regexp.MustCompile(`(?m:<h(\d)>(.*?)<\/h\d>)`)
+
+	html = headingRegex.ReplaceAllFunc(html, func(match []byte) []byte {
+		submatches := headingRegex.FindSubmatch(match)
+		headingLevel := int(submatches[1][0] - '0')
+		headingText := string(submatches[2])
+
+		id := strings.ToLower(headingText)
+		id = regexp.MustCompile(`[^a-z0-9]+`).ReplaceAllString(id, "-")
+
+		return []byte(fmt.Sprintf(`<h%d id="%s">%s <a class="headerlink" href="#%s" title="Permanent link">¶</a></h%d>`, headingLevel, id, headingText, id, headingLevel))
+	})
+
+	return html
 }
 
 // Renders out.HTML into dst html file, using the template specified
