@@ -56,14 +56,14 @@ func (out *Output) RenderMarkdown(source []byte) error {
 		bf.WithExtensions(bfExts),
 	)
 
-	// inject heading IDs
-	out.HTML = generateHeadingIDs(out.HTML)
+	// inject header IDs
+	out.HTML = generateHeaderIDs(out.HTML)
 
 	out.Meta = md.Frontmatter
 	return nil
 }
 
-func generateHeadingIDs(html []byte) []byte {
+func generateHeaderIDs(html []byte) []byte {
 	headingRegex := regexp.MustCompile(`(?m:<h(\d)>(.*?)<\/h\d>)`)
 
 	html = headingRegex.ReplaceAllFunc(html, func(match []byte) []byte {
